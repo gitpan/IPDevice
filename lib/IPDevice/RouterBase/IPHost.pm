@@ -4,11 +4,11 @@
 ## hostname <-> IP mapping.
 ####
 
-package IPDevice::RouterBase::IPHost;
-use IPDevice::RouterBase::Atom;
+package RouterBase::IPHost;
+use RouterBase::Atom;
 use strict;
 use vars qw($VERSION @ISA);
-@ISA = qw(IPDevice::RouterBase::Atom);
+@ISA = qw(RouterBase::Atom);
 
 $VERSION = 0.01;
 
@@ -18,12 +18,12 @@ use constant FALSE => 0;
 
 =head1 NAME
 
-IPDevice::RouterBase::IPHost
+RouterBase::IPHost
 
 =head1 SYNOPSIS
 
- use IPDevice::RouterBase::IPHost;
- my $map = new IPDevice::RouterBase::IPHost("localhost", "80");
+ use RouterBase::IPHost;
+ my $map = new RouterBase::IPHost("localhost", "80");
  $map->set_ip('127.0.0.1');
 
 =head1 DESCRIPTION
@@ -56,7 +56,7 @@ sub new {
 sub _init {
   my($self, $hostname, $port, %args) = @_;
   $self->{hostname} = $hostname;
-  $self->{port}     = $port;
+  $self->{port}     = $port ? $port : 0;
   return $self;
 }
 

@@ -4,13 +4,13 @@
 ## informations regarding an IP router.
 ####
 
-package IPDevice::RouterBase;
-use IPDevice::RouterBase::Card;
-use IPDevice::RouterBase::Prefixlist;
-use IPDevice::RouterBase::StaticRoute;
-use IPDevice::RouterBase::BGP;
-use IPDevice::RouterBase::ISIS;
-use IPDevice::RouterBase::IPHost;
+package RouterBase;
+use RouterBase::Card;
+use RouterBase::Prefixlist;
+use RouterBase::StaticRoute;
+use RouterBase::BGP;
+use RouterBase::ISIS;
+use RouterBase::IPHost;
 use strict;
 use vars qw($VERSION);
 
@@ -22,12 +22,12 @@ use constant FALSE => 0;
 
 =head1 NAME
 
-IPDevice::RouterBase
+RouterBase
 
 =head1 SYNOPSIS
 
- use IPDevice::RouterBase;
- my $router = new IPDevice::RouterBase;
+ use RouterBase;
+ my $router = new RouterBase;
  $router->set_hostname('hostname');
  my $card = $router->card(0);
  $card->module(1);
@@ -176,7 +176,7 @@ sub get_cfgversion {
 
 =head2 card($cardnumber)
 
-Returns the L<IPDevice::RouterBase::Card|IPDevice::RouterBase::Card> with the given number.
+Returns the L<RouterBase::Card|RouterBase::Card> with the given number.
 If it does not exist, it will be created.
 If no card number is given, a virtual card will be returned anyway.
 You can, for example, add modules/interfaces that do not have a pysical card
@@ -185,11 +185,11 @@ there.
 =cut
 sub card {
   my($self, $cardno) = @_;
-  #print "DEBUG: IPDevice::RouterBase::card(): Called.\n";
+  #print "DEBUG: RouterBase::card(): Called.\n";
   $cardno = -1 if !defined $cardno;
   return $self->{cards}->{$cardno} if $self->{cards}->{$cardno};
-  #print "DEBUG: IPDevice::RouterBase::card(): New card $cardno.\n";
-  my $card = new IPDevice::RouterBase::Card(name => $cardno);
+  #print "DEBUG: RouterBase::card(): New card $cardno.\n";
+  my $card = new RouterBase::Card(name => $cardno);
   $card->set_number($cardno);
   return $self->{cards}->{$cardno} = $card;
 }
@@ -197,56 +197,54 @@ sub card {
 
 =head2 isis()
 
-Returns the L<IPDevice::RouterBase::ISIS|IPDevice::RouterBase::ISIS> instance.
+Returns the L<RouterBase::ISIS|RouterBase::ISIS> instance.
 If that ISIS instance does not yet exist, a new one will be created/returned.
 
 =cut
 sub isis {
   my $self = shift;
   return $self->{isis} if $self->{isis};
-  $self->{isis} = new IPDevice::RouterBase::ISIS;
+  $self->{isis} = new RouterBase::ISIS;
 }
 
 
 =head2 bgp($localas)
 
-Returns the L<IPDevice::RouterBase::BGP|IPDevice::RouterBase::BGP> instance
-with the given local as number.
+Returns the L<RouterBase::BGP|RouterBase::BGP> instance with the given local
+as number.
 If that BGP instance does not yet exist, a new one will be created/returned.
 
 =cut
 sub bgp {
   my($self, $localas) = @_;
   return $self->{bgp}->{$localas} if $self->{bgp}->{$localas};
-  $self->{bgp}->{$localas} = new IPDevice::RouterBase::BGP(localas => $localas);
+  $self->{bgp}->{$localas} = new RouterBase::BGP(localas => $localas);
 }
 
 
 =head2 prefixlist($name)
 
-Returns the L<IPDevice::RouterBase::Prefixlist|IPDevice::RouterBase::Prefixlist>
-with the given name. If the
-L<IPDevice::RouterBase::Prefixlist|IPDevice::RouterBase::Prefixlist> does not
-exist yet, it will be created and returned.
+Returns the L<RouterBase::Prefixlist|RouterBase::Prefixlist> with the given
+name. If the L<RouterBase::Prefixlist|RouterBase::Prefixlist> does not exist
+yet, it will be created and returned.
 
 =cut
 sub prefixlist {
   my($s, $name) = @_;
   return $s->{prefixlists}->{$name} if $s->{prefixlists}->{$name};
-  return $s->{prefixlists}->{$name} = new IPDevice::RouterBase::Prefixlist(name => $name);
+  return $s->{prefixlists}->{$name} = new RouterBase::Prefixlist(name => $name);
 }
 
 
 =head2 add_staticroute($ip, $mask, $destination)
 
 Add a new static route to the router.
-Returns the newly created
-L<IPDevice::RouterBase::StaticRoute|IPDevice::RouterBase::StaticRoute>.
+Returns the newly created L<RouterBase::StaticRoute|RouterBase::StaticRoute>.
 
 =cut
 sub add_staticroute {
   my($self, $ip, $mask, $dest) = @_;
-  my $route = new IPDevice::RouterBase::StaticRoute;
+  my $route = new RouterBase::StaticRoute;
   $route->set_network($ip, $mask);
   $route->set_destination($dest);
   return $self->{staticroutes}->{"$ip/$mask"} = $route;
@@ -255,9 +253,8 @@ sub add_staticroute {
 
 =head2 get_staticroute($ip, $mask)
 
-Returns the
-L<IPDevice::RouterBase::StaticRoute|IPDevice::RouterBase::StaticRoute> with the
-given ip and mask.
+Returns the L<RouterBase::StaticRoute|RouterBase::StaticRoute> with the given
+ip and mask.
 
 =cut
 sub get_staticroute {
@@ -268,8 +265,8 @@ sub get_staticroute {
 
 =head2 ip_host($name, $port)
 
-Returns the L<IPDevice::RouterBase::IPHost|IPDevice::RouterBase::IPHost> with
-the given hostname/port.
+Returns the L<RouterBase::IPHost|RouterBase::IPHost> with the given
+hostname/port.
 If it does not exist yet, a new one will be created.
 
 =cut
@@ -278,7 +275,7 @@ sub ip_host {
   $port *= 1 if $port;
   return $self->{ip_hosts}->{"$name/$port"}
       if $self->{ip_hosts}->{"$name/$port"};
-  $self->{ip_hosts}->{"$name/$port"} = new IPDevice::RouterBase::IPHost($name, $port);
+  $self->{ip_hosts}->{"$name/$port"} = new RouterBase::IPHost($name, $port);
   return $self->{ip_hosts}->{"$name/$port"};
 }
 
@@ -288,7 +285,7 @@ sub ip_host {
 Walks through all hostname <-> IP mappings calling the function $func.
 Args passed to $func are:
 
-I<$card>: The L<IPDevice::RouterBase::IPHost|IPDevice::RouterBase::IPHost>.
+I<$card>: The L<RouterBase::IPHost|RouterBase::IPHost>.
 I<%data>: The given data, just piped through.
 
 If $func returns FALSE, the hostname <-> IP mapping list evaluation will be
@@ -299,7 +296,7 @@ sub foreach_ip_host {
   my($self, $func, %data) = @_;
   for my $host (sort {$a <=> $b} keys %{$self->{ip_hosts}}) {
     my $iphost = $self->{ip_hosts}->{$host};
-    #print "DEBUG: IPDevice::RouterBase::foreach_ip_host(): IP mapping $host\n";
+    #print "DEBUG: RouterBase::foreach_ip_host(): IP mapping $host\n";
     return FALSE if !$func->($iphost, %data);
   }
   return TRUE;
@@ -311,7 +308,7 @@ sub foreach_ip_host {
 Walks through all BGP instances calling the function $func.
 Args passed to $func are:
 
-I<$card>: The L<IPDevice::RouterBase::BGP|IPDevice::RouterBase::BGP>.
+I<$card>: The L<RouterBase::BGP|RouterBase::BGP>.
 I<%data>: The given data, just piped through.
 
 If $func returns FALSE, the BGP instance list evaluation will be stopped.
@@ -319,10 +316,10 @@ If $func returns FALSE, the BGP instance list evaluation will be stopped.
 =cut
 sub foreach_bgp {
   my($self, $func, %data) = @_;
-  #print "DEBUG: IPDevice::RouterBase::foreach_bgp(): Called.\n";
+  #print "DEBUG: RouterBase::foreach_bgp(): Called.\n";
   for my $as (sort {$a <=> $b} keys %{$self->{bgp}}) {
     my $bgp = $self->{bgp}->{$as};
-    #print "DEBUG: IPDevice::RouterBase::foreach_bgp(): BGP instance $as\n";
+    #print "DEBUG: RouterBase::foreach_bgp(): BGP instance $as\n";
     return FALSE if !$func->($bgp, %data);
   }
   return TRUE;
@@ -334,8 +331,7 @@ sub foreach_bgp {
 Walks through all prefixlists calling the function $func.
 Args passed to $func are:
 
-I<$pfxlist>:
-The L<IPDevice::RouterBase::Prefixlist|IPDevice::RouterBase::Prefixlist>.
+I<$pfxlist>: The L<RouterBase::Prefixlist|RouterBase::Prefixlist>.
 I<%data>: The given data, just piped through.
 
 If $func returns FALSE, the list evaluation will be stopped.
@@ -343,10 +339,10 @@ If $func returns FALSE, the list evaluation will be stopped.
 =cut
 sub foreach_prefixlist {
   my($self, $func, %data) = @_;
-  #print "DEBUG: IPDevice::RouterBase::foreach_prefixlist(): Called.\n";
+  #print "DEBUG: RouterBase::foreach_prefixlist(): Called.\n";
   for my $name (keys %{$self->{prefixlists}}) {
     my $pfxlist = $self->{prefixlists}->{$name};
-    #print "DEBUG: IPDevice::RouterBase::foreach_prefixlist(): Prefixlist $name\n";
+    #print "DEBUG: RouterBase::foreach_prefixlist(): Prefixlist $name\n";
     return FALSE if !$func->($pfxlist, %data);
   }
   return TRUE;
@@ -358,7 +354,7 @@ sub foreach_prefixlist {
 Walks through all cards calling the function $func.
 Args passed to $func are:
 
-I<$card>: The L<IPDevice::RouterBase::Card|IPDevice::RouterBase::Card>.
+I<$card>: The L<RouterBase::Card|RouterBase::Card>.
 I<%data>: The given data, just piped through.
 
 If $func returns FALSE, the card list evaluation will be stopped.
@@ -366,10 +362,10 @@ If $func returns FALSE, the card list evaluation will be stopped.
 =cut
 sub foreach_card {
   my($self, $func, %data) = @_;
-  #print "DEBUG: IPDevice::RouterBase::foreach_card(): Called.\n";
+  #print "DEBUG: RouterBase::foreach_card(): Called.\n";
   for my $cardno (sort {$a <=> $b} keys %{$self->{cards}}) {
     my $card = $self->{cards}->{$cardno};
-    #print "DEBUG: IPDevice::RouterBase::foreach_card(): Card number $cardno\n";
+    #print "DEBUG: RouterBase::foreach_card(): Card number $cardno\n";
     return FALSE if !$func->($card, %data);
   }
   return TRUE;
@@ -381,7 +377,7 @@ sub foreach_card {
 Walks through all modules calling the function $func.
 Args passed to $func are:
 
-I<$module>: The L<IPDevice::RouterBase::Module|IPDevice::RouterBase::Module>.
+I<$module>: The L<RouterBase::Module|RouterBase::Module>.
 I<%data>: The given data, just piped through.
 
 If $func returns FALSE, the module list evaluation will be stopped.
@@ -389,10 +385,10 @@ If $func returns FALSE, the module list evaluation will be stopped.
 =cut
 sub foreach_module {
   my($self, $func, %data) = @_;
-  #print "DEBUG: IPDevice::RouterBase::foreach_module(): Called.\n";
+  #print "DEBUG: RouterBase::foreach_module(): Called.\n";
   for my $cardno (sort {$a <=> $b} keys %{$self->{cards}}) {
     my $card = $self->{cards}->{$cardno};
-    #print "DEBUG: IPDevice::RouterBase::foreach_module(): Card number $cardno\n";
+    #print "DEBUG: RouterBase::foreach_module(): Card number $cardno\n";
     return FALSE if !$card->foreach_module($func, %data);
   }
   return TRUE;
@@ -404,8 +400,7 @@ sub foreach_module {
 Walks through all interfaces calling the function $func.
 Args passed to $func are:
 
-I<$interface>:
-The L<IPDevice::RouterBase::Interface|IPDevice::RouterBase::Interface>.
+I<$interface>: The L<RouterBase::Interface|RouterBase::Interface>.
 I<%data>: The given data, just piped through.
 
 If $func returns FALSE, the interface list evaluation will be stopped.
@@ -413,10 +408,10 @@ If $func returns FALSE, the interface list evaluation will be stopped.
 =cut
 sub foreach_interface {
   my($self, $func, %data) = @_;
-  #print "DEBUG: IPDevice::RouterBase::foreach_interface(): Called.\n";
+  #print "DEBUG: RouterBase::foreach_interface(): Called.\n";
   for my $cardno (sort {$a <=> $b} keys %{$self->{cards}}) {
     my $card = $self->{cards}->{$cardno};
-    #print "DEBUG: IPDevice::RouterBase::foreach_interface(): Card number $cardno\n";
+    #print "DEBUG: RouterBase::foreach_interface(): Card number $cardno\n";
     return FALSE if !$card->foreach_interface($func, %data);
   }
   return TRUE;
@@ -425,12 +420,10 @@ sub foreach_interface {
 
 =head2 foreach_unit($func, %data)
 
-Walks through all
-L<IPDevice::RouterBase::LogicalInterface|IPDevice::RouterBase::LogicalInterface>
+Walks through all L<RouterBase::LogicalInterface|RouterBase::LogicalInterface>
 calling the function $func. Args passed to $func are:
 
-I<$interface>: The
-L<IPDevice::RouterBase::LogicalInterface|IPDevice::RouterBase::LogicalInterface>.
+I<$interface>: The L<RouterBase::LogicalInterface|RouterBase::LogicalInterface>.
 I<%data>: The given data, just piped through.
 
 If $func returns FALSE, list evaluation will be stopped.
@@ -438,13 +431,28 @@ If $func returns FALSE, list evaluation will be stopped.
 =cut
 sub foreach_unit {
   my($self, $func, %data) = @_;
-  #print "DEBUG: IPDevice::RouterBase::foreach_unit(): Called.\n";
+  #print "DEBUG: RouterBase::foreach_unit(): Called.\n";
   for my $cardno (sort {$a <=> $b} keys %{$self->{cards}}) {
     my $card = $self->{cards}->{$cardno};
-    #print "DEBUG: IPDevice::RouterBase::foreach_unit(): Card number $cardno\n";
+    #print "DEBUG: RouterBase::foreach_unit(): Card number $cardno\n";
     return FALSE if !$card->foreach_unit($func, %data);
   }
   return TRUE;
+}
+
+
+=head2 print_data()
+
+Prints all data regarding the router to STDOUT (e.g. for debugging).
+
+=cut
+sub print_data {
+  my $self = shift;
+  print "Router Hostname:   ", $self->get_hostname,   "\n";
+  print "Router Vendor:     ", $self->get_vendor,     "\n";
+  print "Router Model:      ", $self->get_model,      "\n";
+  print "Router OS:         ", $self->get_os,         "\n";
+  print "Router Cfgversion: ", $self->get_cfgversion, "\n";
 }
 
 

@@ -4,13 +4,13 @@
 ## router.
 ####
 
-package IPDevice::CiscoRouter;
-use IPDevice::RouterBase;
-use IPDevice::CiscoRouter::Accesslist;
-use IPDevice::CiscoRouter::Card;
+package CiscoRouter;
+use RouterBase;
+use CiscoRouter::Accesslist;
+use CiscoRouter::Card;
 use strict;
 use vars qw($VERSION @ISA);
-@ISA = qw(IPDevice::RouterBase);
+@ISA = qw(RouterBase);
 
 $VERSION = 0.01;
 
@@ -20,12 +20,12 @@ use constant FALSE => 0;
 
 =head1 NAME
 
-IPDevice::CiscoRouter
+CiscoRouter
 
 =head1 SYNOPSIS
 
- use IPDevice::CiscoRouter;
- my $router = new IPDevice::CiscoRouter;
+ use CiscoRouter;
+ my $router = new CiscoRouter;
  $router->set_hostname('hostname');
  my $card = $router->card(0);
  my $acl  = $router->accesslist('DENYSTUPIDS');
@@ -36,23 +36,91 @@ This module provides routines for storing informations regarding a Cisco router.
 
 =head1 CONSTRUCTOR AND METHODS
 
-This module provides, in addition to all methods from L<Router|Router>, the
-following methods.
+This module provides, in addition to all methods from
+L<RouterBase|RouterBase>, the following methods.
+
+=head2 new([%args])
+
+Object constructor. Valid arguments:
+
+I<hostname>: The initial router hostname.
+
+=cut
+sub new {
+  my($class, %args) = @_;
+  $class = ref($class) || $class;
+  my $self = {};
+  bless $self, $class;
+  $self->set_vendor('cisco');
+  return $self->_init(%args);
+}
+
+
+=head2 interfacename($interfacename)
+
+Returns the L<RouterBase::Interface|RouterBase::Interface> with the given name.
+Valid names have the format 'POS1/2/3', 'Loopback0', 'Serial1/0/0:0', or
+just '1/2/3' etc.
+If the interface does not yet exist, it will be created.
+
+=cut
+sub interfacename {
+  my($self, $logintname) = @_;
+  #print "CiscoRouter::interfacename(): $logintname\n";
+  my $logintno =  $logintname;  # Logical interface number.
+  my $intname  =  $logintname;  # Physical interface name.
+  my $intno    =  $logintname;  # Interface name without the type.
+  my $unit;                     # Unit number.
+  $logintno    =~ s/^[^\d]*//;
+  $intname     =~ s/[:\.].*$//;
+  $intno       =~ s/^[^\d]*([^:\.]+).*/$1/;
+  $unit        = $1 if $logintname =~ /[:\.](\d+)$/;
+  
+  # Extract the interface, module and card from the name.
+  my($card, $mod);
+  $card  = $1, $mod = $2 if $intno =~ /^(\d+)\/(\d+)\/\d+[:\.]?/;
+  $card  = $1            if $intno =~ /^(\d+)\/\d+$/;
+  #print "CiscoRouter::interfacename(): $logintname, $card/$mod/x:$unit\n";
+  return $self->card($card)->module($mod)->interface($intname) if !defined $unit;
+  return $self->card($card)->module($mod)->interface($intname)->unit($unit);
+}
+
 
 =head2 accesslist($name)
 
-Returns the
-L<IPDevice::CiscoRouter::Accesslist|IPDevice::CiscoRouter::Accesslist> with the
-given name. If the
-L<IPDevice::CiscoRouter::Accesslist|IPDevice::CiscoRouter::Accesslist> does not
-yet exist, it will be created.
+Returns the L<CiscoRouter::Accesslist|CiscoRouter::Accesslist> with the given
+name. If the L<CiscoRouter::Accesslist|CiscoRouter::Accesslist> does not yet
+exist, it will be created.
 
 =cut
 sub accesslist {
   my($self, $name) = @_;
   return $self->{accesslists}->{$name} if $self->{accesslists}->{$name};
-  my $accesslist = new IPDevice::CiscoRouter::Accesslist(name => $name);
+  my $accesslist = new CiscoRouter::Accesslist(name => $name);
   return $self->{accesslists}->{$name} = $accesslist;
+}
+
+
+=head2 foreach_accesslist($func, %data)
+
+Walks through all L<CiscoRouter::Accesslist|CiscoRouter::Accesslist>
+calling the function $func. Args passed to $func are:
+
+I<$acl>: The L<CiscoRouter::Accesslist|CiscoRouter::Accesslist>.
+I<%data>: The given data, just piped through.
+
+If $func returns FALSE, list evaluation will be stopped.
+
+=cut
+sub foreach_accesslist {
+  my($self, $func, %data) = @_;
+  #print "DEBUG: CiscoRouter::foreach_accesslist(): Called.\n";
+  for my $aclname (keys %{$self->{accesslists}}) {
+    my $acl = $self->{accesslists}->{$aclname};
+    #print "DEBUG: CiscoRouter::foreach_accesslist(): ACL $aclname\n";
+    return FALSE if !$func->($acl, %data);
+  }
+  return TRUE;
 }
 
 

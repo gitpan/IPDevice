@@ -20,8 +20,8 @@
 ## This file provides a class for holding informations about a Cisco accesslist.
 ####
 
-package IPDevice::CiscoRouter::Accesslist;
-use IPDevice::CiscoRouter::AccesslistEntry;
+package CiscoRouter::Accesslist;
+use CiscoRouter::AccesslistEntry;
 use strict;
 use vars qw($VERSION);
 
@@ -33,12 +33,12 @@ use constant FALSE => 0;
 
 =head1 NAME
 
-IPDevice::CiscoRouter::Accesslist
+CiscoRouter::Accesslist
 
 =head1 SYNOPSIS
 
- use IPDevice::CiscoRouter::Accesslist;
- my $acl = new IPDevice::CiscoRouter::Accesslist;
+ use CiscoRouter::Accesslist;
+ my $acl = new CiscoRouter::Accesslist;
  $acl->set_id(10);
  $acl->add_entry('permit', '192.168.0.0/22', '20', '24');
 
@@ -57,11 +57,11 @@ I<id>: The accesslist number.
 
 =cut
 sub new {
-	my($class, %args) = @_;
-	$class = ref($class) || $class;
-	my $self = {};
-	bless $self, $class;
-	return $self->_init(%args);
+  my($class, %args) = @_;
+  $class = ref($class) || $class;
+  my $self = {};
+  bless $self, $class;
+  return $self->_init(%args);
 }
 
 
@@ -69,30 +69,52 @@ sub new {
 ##
 sub _init {
   my($self, %args) = @_;
-  $self->{id} = $args{id} * 1 if $args{id};
+  $self->{name} = $args{name};
   return $self;
 }
 
 
-=head2 set_id($id)
+=head2 set_name($id)
 
-Set the accesslist number. (INTEGER)
+Set the accesslist name.
 
 =cut
-sub set_id {
-  my($self, $id) = @_;
-  $self->{id} = $id * 1;
+sub set_name {
+  my($self, $name) = @_;
+  $self->{name} = $name;
 }
 
 
-=head2 get_id()
+=head2 get_name()
 
-Returns the accesslist number. (INTEGER)
+Returns the accesslist number.
 
 =cut
-sub get_id {
+sub get_name {
   my $self = shift;
-  return $self->{id};
+  return $self->{name};
+}
+
+
+=head2 set_description($id)
+
+Set the accesslist description.
+
+=cut
+sub set_description {
+  my($self, $descr) = @_;
+  $self->{descr} = $descr;
+}
+
+
+=head2 get_description()
+
+Returns the accesslist description.
+
+=cut
+sub get_description {
+  my $self = shift;
+  return $self->{descr};
 }
 
 
@@ -104,34 +126,35 @@ Returns TRUE on success, otherwise FALSE.
 =cut
 sub add_entry {
   my($self, $permitdeny, @fields) = @_;
-  my $aclentry = new IPDevice::CiscoRouter::AccesslistEntry;
+  my $aclentry = new CiscoRouter::AccesslistEntry;
   return FALSE if !$aclentry->set_permitdeny($permitdeny);
-  my $i = 0;
+  my $i = 1;
   for my $field (@fields) {
     return FALSE if !$aclentry->set_field($i, $field);
+    $i++;
   }
   push(@{$self->{accesslist}}, $aclentry);
   return TRUE;
 }
 
 
-=head2 for_each($func, $data)
+=head2 foreach_entry($func, %data)
 
 Walks through the ACL calling the function $func for every ACL statement.
 Args passed to $func are:
 
-I<$aclentry>: The
-L<IPDevice::CiscoRouter::AccesslistEntry|IPDevice::CiscoRouter::AccesslistEntry>.
-I<$data>: The given data, just piped through.
+I<$aclentry>: The L<CiscoRouter::AccesslistEntry|CiscoRouter::AccesslistEntry>.
+I<%data>: The given data, just piped through.
 
 If $func returns FALSE, list evaluation will be stopped.
 
 =cut
-sub for_each {
-  my($self, $func, $data) = @_;
+sub foreach_entry {
+  my($self, $func, %data) = @_;
   for my $aclentry (@{$self->{accesslist}}) {
-    return if !$func->($aclentry, $data);
+    return FALSE if !$func->($aclentry, %data);
   }
+  return TRUE;
 }
 
 

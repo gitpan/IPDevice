@@ -17,10 +17,10 @@
 ####
 
 ####
-## This file provides a methods for IP Version 4 based checks and conversions.
+## This file provides methods for IP Version 4 based checks and conversions.
 ####
 
-package IPDevice::IPv4;
+package IPv4;
 use strict;
 
 use constant TRUE  => 1;
@@ -30,7 +30,7 @@ my $BYTE = '[1-2]?[0-9]?[0-9]';   # Matches an integer representing a byte.
 
 =head1 NAME
 
-IPDevice::IPv4
+IPv4
 
 =head1 DESCRIPTION
 
@@ -38,10 +38,10 @@ This module provides routines for IP Version 4 based checks and conversions.
 
 =head1 SYNOPSIS
 
- use IPDevice::IPv4;
- if (IPDevice::IPv4::check_ip("10.131.10.1")) { print "Valid IP address.";  }
+ use IPv4;
+ if (IPv4::check_ip("10.131.10.1")) { print "Valid IP address.";  }
  else                         { print "Invalid IP address"; }
- if (IPDevice::IPv4::check_ip("10.131.10.1/24")) { print "Valid prefix.";  }
+ if (IPv4::check_ip("10.131.10.1/24")) { print "Valid prefix.";  }
  else                            { print "Invalid prefix"; }
 
 =head1 METHODS

@@ -3,12 +3,12 @@
 ## This file provides a class for holding informations regarding a BGP VRF.
 ####
 
-package IPDevice::RouterBase::BGPVRF;
-use IPDevice::RouterBase::Atom;
-use IPDevice::RouterBase::BGPNeighbor;
+package RouterBase::BGPVRF;
+use RouterBase::Atom;
+use RouterBase::BGPNeighbor;
 use strict;
 use vars qw($VERSION @ISA);
-@ISA = qw(IPDevice::RouterBase::Atom);
+@ISA = qw(RouterBase::Atom);
 
 $VERSION = 0.01;
 
@@ -18,12 +18,12 @@ use constant FALSE => 0;
 
 =head1 NAME
 
-IPDevice::RouterBase::BGPVRF
+RouterBase::BGPVRF
 
 =head1 SYNOPSIS
 
- use IPDevice::RouterBase::BGPVRF;
- my $vrf = new IPDevice::RouterBase::BGPVRF;
+ use RouterBase::BGPVRF;
+ my $vrf = new RouterBase::BGPVRF;
  $vrf->set_name('NeighborName');
  my $neigh = $vrf->add_neighbor('192.168.0.2');
 
@@ -41,11 +41,11 @@ I<name>: The VRF name.
 
 =cut
 sub new {
-	my($class, %args) = @_;
-	$class = ref($class) || $class;
-	my $self = {};
-	bless $self, $class;
-	return $self->_init(%args);
+  my($class, %args) = @_;
+  $class = ref($class) || $class;
+  my $self = {};
+  bless $self, $class;
+  return $self->_init(%args);
 }
 
 
@@ -105,16 +105,15 @@ sub get_description {
 =head2 neighbor($ip)
 
 Returns the BGP neighbor with the given IP. If the neighbor does not exist yet,
-a newly created
-L<IPDevice::RouterBase::BGPNeighbor|IPDevice::RouterBase::BGPNeighbor> will be
+a newly created L<RouterBase::BGPNeighbor|RouterBase::BGPNeighbor> will be
 returned.
 
 =cut
 sub neighbor {
   my($self, $ip) = @_;
-  #print "DEBUG: IPDevice::RouterBase::BGPVRF::neighbor(): Called. ($ip)\n";
+  #print "DEBUG: RouterBase::BGPVRF::neighbor(): Called. ($ip)\n";
   return $self->{neighbors}->{$ip} if $self->{neighbors}->{$ip};
-  my $neigh = new IPDevice::RouterBase::BGPNeighbor;
+  my $neigh = new RouterBase::BGPNeighbor;
   $neigh->set_toplevel($self->toplevel);
   $neigh->set_parent($self->parent);
   $neigh->set_ip($ip);
@@ -127,8 +126,7 @@ sub neighbor {
 Walks through all BGP neighbors calling the function $func.
 Args passed to $func are:
 
-I<$neighbor>: The
-L<IPDevice::RouterBase::BGPNeighbor|IPDevice::RouterBase::BGPNeighbor>.
+I<$neighbor>: The L<RouterBase::BGPNeighbor|RouterBase::BGPNeighbor>.
 I<%data>: The given data, just piped through.
 
 If $func returns FALSE, the neighbor list evaluation will be stopped.
@@ -136,10 +134,10 @@ If $func returns FALSE, the neighbor list evaluation will be stopped.
 =cut
 sub foreach_neighbor {
   my($self, $func, %data) = @_;
-  #print "DEBUG: IPDevice::RouterBase::BGPVRF::foreach_neighbor(): Called.\n";
+  #print "DEBUG: RouterBase::BGPVRF::foreach_neighbor(): Called.\n";
   for my $neighborip (sort {$a <=> $b} keys %{$self->{neighbors}}) {
     my $neighbor = $self->{neighbors}->{$neighborip};
-    #print "DEBUG: IPDevice::RouterBase::BGPVRF::foreach_neighbor(): NeighIP $neighborip\n";
+    #print "DEBUG: RouterBase::BGPVRF::foreach_neighbor(): NeighIP $neighborip\n";
     return FALSE if !$func->($neighbor, %data);
   }
   return TRUE;

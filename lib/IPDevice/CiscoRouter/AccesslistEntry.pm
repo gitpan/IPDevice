@@ -21,7 +21,7 @@
 ## entry.
 ####
 
-package IPDevice::CiscoRouter::AccesslistEntry;
+package CiscoRouter::AccesslistEntry;
 use strict;
 use vars qw($VERSION);
 
@@ -33,12 +33,12 @@ use constant FALSE => 0;
 
 =head1 NAME
 
-IPDevice::CiscoRouter::AccesslistEntry
+CiscoRouter::AccesslistEntry
 
 =head1 SYNOPSIS
 
- use IPDevice::CiscoRouter::AccesslistEntry;
- my $entry = new IPDevice::CiscoRouter::AccesslistEntry;
+ use CiscoRouter::AccesslistEntry;
+ my $entry = new CiscoRouter::AccesslistEntry;
  $entry->set_permitdeny('deny');
  $entry->set_field(1, '192.168.0.0/22');
  $entry->set_field(2, '20');
@@ -60,11 +60,11 @@ I<permitdeny>: Valid values: permit|deny. Default is permit.
 
 =cut
 sub new {
-	my($class, %args) = @_;
-	$class = ref($class) || $class;
-	my $self = {};
-	bless $self, $class;
-	return $self->_init(%args);
+  my($class, %args) = @_;
+  $class = ref($class) || $class;
+  my $self = {};
+  bless $self, $class;
+  return $self->_init(%args);
 }
 
 
@@ -72,8 +72,6 @@ sub new {
 ##
 sub _init {
   my($self, %args) = @_;
-  $self->{id}         = $args{id}         || -1;
-  $self->{id}        *= 1;
   $self->{permitdeny} = $args{permitdeny} || 'permit';
   $self->{fields}     = [];
   return $self;

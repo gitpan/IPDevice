@@ -4,12 +4,12 @@
 ## neighbor.
 ####
 
-package IPDevice::RouterBase::BGPNeighbor;
-use IPDevice::RouterBase::Atom;
-use IPDevice::IPv4;
+package RouterBase::BGPNeighbor;
+use RouterBase::Atom;
+use IPv4;
 use strict;
 use vars qw($VERSION @ISA);
-@ISA = qw(IPDevice::RouterBase::Atom);
+@ISA = qw(RouterBase::Atom);
 
 $VERSION = 0.01;
 
@@ -19,12 +19,12 @@ use constant FALSE => 0;
 
 =head1 NAME
 
-IPDevice::RouterBase::BGPNeighbor
+RouterBase::BGPNeighbor
 
 =head1 SYNOPSIS
 
- use IPDevice::RouterBase::BGPNeighbor;
- my $neigh = new IPDevice::RouterBase::BGPNeighbor;
+ use RouterBase::BGPNeighbor;
+ my $neigh = new RouterBase::BGPNeighbor;
  $neigh->set_name('Neighbor Name');
  $neigh->set_ip('192.168.0.2');
 
@@ -137,7 +137,7 @@ Returns FALSE if the ip is invalid, otherwise TRUE.
 =cut
 sub set_ip {
   my($self, $ip) = @_;
-  return FALSE if IPDevice::IPv4::check_ip($ip) != 0;
+  return FALSE if IPv4::check_ip($ip) != 0;
   $self->{ip} = $ip;
   return TRUE;
 }

@@ -3,12 +3,12 @@
 ## This file provides a class for holding informations about a router card.
 ####
 
-package IPDevice::RouterBase::Card;
-use IPDevice::RouterBase::Atom;
-use IPDevice::RouterBase::Module;
+package RouterBase::Card;
+use RouterBase::Atom;
+use RouterBase::Module;
 use strict;
 use vars qw($VERSION @ISA);
-@ISA = qw(IPDevice::RouterBase::Atom);
+@ISA = qw(RouterBase::Atom);
 
 $VERSION = 0.01;
 
@@ -18,12 +18,12 @@ use constant FALSE => 0;
 
 =head1 NAME
 
-IPDevice::RouterBase::Card
+RouterBase::Card
 
 =head1 SYNOPSIS
 
- use IPDevice::RouterBase::Card;
- my $card = new IPDevice::RouterBase::Card;
+ use RouterBase::Card;
+ my $card = new RouterBase::Card;
  $card->module(1)->interface(2)->set_encapsulation('ppp');
 
 =head1 DESCRIPTION
@@ -53,14 +53,15 @@ sub new {
 ##
 sub _init {
   my($self, %args) = @_;
+  $self->set_memory_size(0);
+  $self->set_linememory_size(0);
   return $self;
 }
 
 
 =head2 set_number($number)
 
-Defines the card number. When created via any class from the
-L<IPDevice::RouterBase|IPDevice::RouterBase>
+Defines the card number. When created via any class from the RouterBase
 namespace, this is automatically set.
 
 =cut
@@ -147,9 +148,31 @@ sub get_memory_size {
 }
 
 
+=head2 set_linememory_size($memorysize)
+
+Defines the card's line-memory size.
+
+=cut
+sub set_linememory_size {
+  my($self, $linememorysize) = @_;
+  $self->{linememorysize} = $linememorysize;
+}
+
+
+=head2 get_linememory_size()
+
+Returns the card's line-memory size.
+
+=cut
+sub get_linememory_size {
+  my $self = shift;
+  return $self->{linememorysize};
+}
+
+
 =head2 set_serialnumber($serialumber)
 
-Defines the card's memory size.
+Defines the card's serial number.
 
 =cut
 sub set_serialnumber {
@@ -160,12 +183,34 @@ sub set_serialnumber {
 
 =head2 get_serialnumber()
 
-Returns the card's memory size.
+Returns the card's serial number.
 
 =cut
 sub get_serialnumber {
   my $self = shift;
   return $self->{serialnumber};
+}
+
+
+=head2 set_partnumber($partnumber)
+
+Defines the card vendor's part number.
+
+=cut
+sub set_partnumber {
+  my($self, $partnumber) = @_;
+  $self->{partnumber} = $partnumber;
+}
+
+
+=head2 get_partnumber()
+
+Returns the card vendor's part number.
+
+=cut
+sub get_partnumber {
+  my $self = shift;
+  return $self->{partnumber};
 }
 
 
@@ -210,6 +255,28 @@ Returns the processor type.
 sub get_processor {
   my $self = shift;
   return $self->{processor};
+}
+
+
+=head2 set_slave($speed)
+
+Defines whether the card is slave.
+
+=cut
+sub set_slave {
+  my($self, $slave) = @_;
+  $self->{slave} = $slave;
+}
+
+
+=head2 get_slave()
+
+Returns whether the card is slave.
+
+=cut
+sub get_slave {
+  my $self = shift;
+  return $self->{slave};
 }
 
 
@@ -293,7 +360,7 @@ sub module {
   $moduleno = -1 if !defined $moduleno;
   my $module = $self->{modules}->{$moduleno};
   if (!$module) {
-    $module = new IPDevice::RouterBase::Module;
+    $module = new RouterBase::Module;
     $module->set_toplevel($self->toplevel);
     $module->set_parent($self->parent);
     $module->set_number($moduleno);
@@ -319,7 +386,7 @@ sub interface {
   
   my $module = $self->{modules}->{$moduleno};
   if (!$module) {
-    $module = new IPDevice::RouterBase::Module;
+    $module = new RouterBase::Module;
     $module->set_name($moduleno);
     $self->{modules}->{$moduleno} = $module;
   }
@@ -333,7 +400,7 @@ sub interface {
 Walks through all modules calling the function $func.
 Args passed to $func are:
 
-I<$module>: The L<IPDevice::RouterBase::Module|IPDevice::RouterBase::Module>.
+I<$module>: The L<RouterBase::Module|RouterBase::Module>.
 I<%data>: The given data, just piped through.
 
 If $func returns FALSE, list evaluation will be stopped.
@@ -343,7 +410,7 @@ sub foreach_module {
   my($self, $func, %data) = @_;
   for my $moduleno (keys %{$self->{modules}}) {
     my $module = $self->{modules}->{$moduleno};
-    #print "DEBUG: IPDevice::RouterBase::Card::foreach_module(): Module $moduleno\n";
+    #print "DEBUG: RouterBase::Card::foreach_module(): Module $moduleno\n";
     return FALSE if !$func->($module, %data);
   }
   return TRUE;
@@ -355,8 +422,7 @@ sub foreach_module {
 Walks through all interfaces calling the function $func.
 Args passed to $func are:
 
-I<$interface>: The
-L<IPDevice::RouterBase::Interface|IPDevice::RouterBase::Interface>.
+I<$interface>: The L<RouterBase::Interface|RouterBase::Interface>.
 I<%data>: The given data, just piped through.
 
 If $func returns FALSE, list evaluation will be stopped.
@@ -366,7 +432,7 @@ sub foreach_interface {
   my($self, $func, %data) = @_;
   for my $moduleno (sort {$a <=> $b} keys %{$self->{modules}}) {
     my $module = $self->{modules}->{$moduleno};
-    #print "DEBUG: IPDevice::RouterBase::Card::foreach_interface(): Module $moduleno\n";
+    #print "DEBUG: RouterBase::Card::foreach_interface(): Module $moduleno\n";
     return FALSE if !$module->foreach_interface($func, %data);
   }
   return TRUE;
@@ -375,12 +441,10 @@ sub foreach_interface {
 
 =head2 foreach_unit($func, %data)
 
-Walks through all
-L<IPDevice::RouterBase::LogicalInterface|IPDevice::RouterBase::LogicalInterface>
+Walks through all L<RouterBase::LogicalInterface|RouterBase::LogicalInterface>
 calling the function $func. Args passed to $func are:
 
-I<$unit>: The
-L<IPDevice::RouterBase::LogicalInterface|IPDevice::RouterBase::LogicalInterface>.
+I<$unit>: The L<RouterBase::LogicalInterface|RouterBase::LogicalInterface>.
 I<%data>: The given data, just piped through.
 
 If $func returns FALSE, list evaluation will be stopped.
@@ -390,7 +454,7 @@ sub foreach_unit {
   my($self, $func, %data) = @_;
   for my $moduleno (sort {$a <=> $b} keys %{$self->{modules}}) {
     my $module = $self->{modules}->{$moduleno};
-    #print "DEBUG: IPDevice::RouterBase::Card::foreach_unit(): Module $moduleno\n";
+    #print "DEBUG: RouterBase::Card::foreach_unit(): Module $moduleno\n";
     return FALSE if !$module->foreach_unit($func, %data);
   }
   return TRUE;
@@ -404,10 +468,12 @@ Prints all data regarding the card to STDOUT (e.g. for debugging).
 =cut
 sub print_data {
   my $self = shift;
-  print "Card number:          ", $self->get_number,         "\n";
-  print "Card type:            ", $self->get_type,           "\n";
-  print "Card description:     ", $self->get_description,    "\n";
-  print "Card serialno.:       ", $self->get_serialnumber,   "\n";
+  print "Card number:          ", $self->get_number,          "\n";
+  print "Card type:            ", $self->get_type,            "\n";
+  print "Card description:     ", $self->get_description,     "\n";
+  print "Card serialno.:       ", $self->get_serialnumber,    "\n";
+  print "Card memory:          ", $self->get_memory_size,     "\n";
+  print "Card line-memory:     ", $self->get_linememory_size, "\n";
 }
 
 

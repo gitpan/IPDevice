@@ -4,12 +4,12 @@
 ## entry.
 ####
 
-package IPDevice::RouterBase::PrefixlistEntry;
-use IPDevice::RouterBase::Atom;
-use IPDevice::IPv4;
+package RouterBase::PrefixlistEntry;
+use RouterBase::Atom;
+use IPv4;
 use strict;
 use vars qw($VERSION @ISA);
-@ISA = qw(IPDevice::RouterBase::Atom);
+@ISA = qw(RouterBase::Atom);
 
 $VERSION = 0.01;
 
@@ -19,12 +19,12 @@ use constant FALSE => 0;
 
 =head1 NAME
 
-IPDevice::RouterBase::PrefixlistEntry
+RouterBase::PrefixlistEntry
 
 =head1 SYNOPSIS
 
- use IPDevice::RouterBase::PrefixlistEntry;
- my $entry = new IPDevice::RouterBase::PrefixlistEntry;
+ use RouterBase::PrefixlistEntry;
+ my $entry = new RouterBase::PrefixlistEntry;
  $entry->set_prefix('192.168.0.0/22');
  $entry->set_ge(20);
  $entry->set_le(24);
@@ -62,6 +62,28 @@ sub _init {
 }
 
 
+=head2 set_sequence($seq)
+
+Defines the sequence number of the entry.
+
+=cut
+sub set_sequence {
+  my($self, $seq) = @_;
+  $self->{seq} = $seq * 1;
+}
+
+
+=head2 get_sequence()
+
+Returns the sequence number of the entry.
+
+=cut
+sub get_sequence {
+  my $self = shift;
+  return $self->{seq};
+}
+
+
 =head2 set_prefix($prefix)
 
 Check & set the IP prefix.
@@ -70,10 +92,10 @@ Check & set the IP prefix.
 sub set_prefix {
   my($self, $prefix) = @_;
   return FALSE if $prefix !~ /^([^\/]+)\/(\d+)$/;
-  return FALSE if IPDevice::IPv4::check_ip($1) < 0;
-  return FALSE if IPDevice::IPv4::check_prefixlen($2) < 0;
+  return FALSE if IPv4::check_ip($1) < 0;
+  return FALSE if IPv4::check_prefixlen($2) < 0;
   $self->{network} = $1;
-  $self->{mask}    = IPDevice::IPv4::pfxlen2mask($2);
+  $self->{mask}    = IPv4::pfxlen2mask($2);
   return TRUE;
 }
 
@@ -85,7 +107,7 @@ Returns the IP prefix.
 =cut
 sub get_prefix {
   my $self = shift;
-  my $pfxlen = IPDevice::IPv4::mask2pfxlen($self->{mask});
+  my $pfxlen = IPv4::mask2pfxlen($self->{mask});
   return "$self->{network}/$pfxlen";
 }
 
@@ -97,7 +119,7 @@ Set the IP network address.
 =cut
 sub set_network {
   my($self, $network) = @_;
-  return FALSE if !IPDevice::IPv4::check_ip($network);
+  return FALSE if !IPv4::check_ip($network);
   $self->{network} = $network;
 }
 
@@ -142,7 +164,7 @@ Set the IP prefix length.
 =cut
 sub set_prefixlen {
   my($self, $pfxlen) = @_;
-  $self->{mask} = IPDevice::IPv4::pfxlen2mask($pfxlen);
+  $self->{mask} = IPv4::pfxlen2mask($pfxlen);
 }
 
 
@@ -153,7 +175,7 @@ Returns the IP prefix length.
 =cut
 sub get_prefixlen {
   my $self = shift;
-  return IPDevice::IPv4::mask2pfxlen($self->{mask});
+  return IPv4::mask2pfxlen($self->{mask});
 }
 
 
@@ -235,7 +257,7 @@ Returns TRUE if the given prefix matches this prefix, otherwise FALSE.
 =cut
 sub matches_prefix {
   my($self, $prefix) = @_;
-  return IPDevice::IPv4::prefix_match($self->{network},
+  return IPv4::prefix_match($self->{network},
                           $self->{mask},
                           $self->{lessequal},
                           $self->{greaterequal},
@@ -250,7 +272,7 @@ Returns TRUE if the ip address is in the range of this prefix, otherwise FALSE.
 =cut
 sub prefix_matches {
   my($self, $ip) = @_;
-  return IPDevice::IPv4::prefix_match($self->{network},
+  return IPv4::prefix_match($self->{network},
                           $self->{mask},
                           32,
                           0,

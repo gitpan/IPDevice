@@ -4,11 +4,11 @@
 ## BGP neighbor group.
 ####
 
-package IPDevice::RouterBase::BGPGroup;
-use IPDevice::RouterBase::Atom;
+package RouterBase::BGPGroup;
+use RouterBase::Atom;
 use strict;
 use vars qw($VERSION @ISA);
-@ISA = qw(IPDevice::RouterBase::Atom IPDevice::RouterBase::BGPNeighbor);
+@ISA = qw(RouterBase::Atom RouterBase::BGPNeighbor);
 
 $VERSION = 0.01;
 
@@ -18,12 +18,12 @@ use constant FALSE => 0;
 
 =head1 NAME
 
-IPDevice::RouterBase::BGPGroup
+RouterBase::BGPGroup
 
 =head1 SYNOPSIS
 
- use IPDevice::RouterBase::BGPGroup;
- my $neigh = new IPDevice::RouterBase::BGPGroup;
+ use RouterBase::BGPGroup;
+ my $neigh = new RouterBase::BGPGroup;
  $neigh->set_name('Neighbor Name');
  $neigh->set_ip('192.168.0.2');
 
@@ -35,7 +35,7 @@ BGP neighbor group.
 =head1 CONSTRUCTOR AND METHODS
 
 This class provides all methods from
-L<IPDevice::RouterBase::BGPNeighbor|IPDevice::RouterBase::BGPNeighbor>.
+L<RouterBase::BGPNeighbor|RouterBase::BGPNeighbor>.
 
 =head1 COPYRIGHT
 

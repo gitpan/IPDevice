@@ -4,11 +4,11 @@
 ## router interface.
 ####
 
-package IPDevice::RouterBase::LogicalInterface;
-use IPDevice::RouterBase::Atom;
+package RouterBase::LogicalInterface;
+use RouterBase::Atom;
 use strict;
 use vars qw($VERSION @ISA);
-@ISA = qw(IPDevice::RouterBase::Atom);
+@ISA = qw(RouterBase::Atom);
 
 $VERSION = 0.01;
 
@@ -18,12 +18,12 @@ use constant FALSE => 0;
 
 =head1 NAME
 
-IPDevice::RouterBase::LogicalInterface
+RouterBase::LogicalInterface
 
 =head1 SYNOPSIS
 
- use IPDevice::RouterBase::LogicalInterface;
- my $interface = new IPDevice::RouterBase::LogicalInterface(name => '0/1/2');
+ use RouterBase::LogicalInterface;
+ my $interface = new RouterBase::LogicalInterface(name => '0/1/2');
  $interface->set_ip('192.168.0.1', '255.255.255.252');
  
  my($ip, $mask) = $interface->get_ip();
@@ -32,8 +32,7 @@ IPDevice::RouterBase::LogicalInterface
 
 This module provides routines for storing informations regarding an logical
 IP router interface. If you have a pysical interface, use the
-L<IPDevice::RouterBase::Interface|IPDevice::RouterBase::Interface>
-implementation instead.
+L<RouterBase::Interface|RouterBase::Interface> implementation instead.
 
 =head1 CONSTRUCTOR AND METHODS
 
@@ -49,6 +48,17 @@ sub new {
   $class = ref($class) || $class;
   my $self = {};
   bless $self, $class;
+  return $self;
+}
+
+
+## Purpose: Initialize a new interface.
+##
+sub _init {
+  my($self, %args) = @_;
+  $self->set_name($args{name}) if $args{name};
+  $self->set_pfxlen(32);
+  $self->set_active(1);
   return $self;
 }
 
@@ -142,14 +152,14 @@ sub get_ip {
 }
 
 
-=head2 C<set_pfxlen($ip, $mask)>
+=head2 C<set_pfxlen($pfxlen)>
 
 Safe the interface's prefix length.
 
 =cut
 sub set_pfxlen {
   my($self, $pfxlen) = @_;
-  $self->{mask} = IPDevice::IPv4::pfxlen2mask($pfxlen);
+  $self->{mask} = IPv4::pfxlen2mask($pfxlen);
 }
 
 
@@ -160,7 +170,7 @@ Returns the interface's prefix length.
 =cut
 sub get_pfxlen {
   my $self = shift;
-  return IPDevice::IPv4::mask2pfxlen($self->{mask});
+  return IPv4::mask2pfxlen($self->{mask});
 }
 
 
